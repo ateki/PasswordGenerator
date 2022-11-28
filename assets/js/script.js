@@ -4,6 +4,7 @@
 // TODO: User option validation and throw error/alert/loop until cancel or enter valid number
 // TODO: Add to Git To Do list ...
 // TODO: Research modules https://stackoverflow.com/questions/8752627/how-can-i-split-a-javascript-application-into-multiple-files
+// TODO: Add object PasswordGenerator so criteria stored as data members.
 
 /*
  * --------------------------------------------------------------------------------------
@@ -52,6 +53,9 @@ const PROMPT_MSG_UPPER_CASE = 'Click OK to confirm including uppercase character
 /*
  *  Various error messages displayed on validating user's password criteria
  */
+
+const ERR_MSG_PASSWORD_CANCELLED = `Password generator cancelled: cancel pressed when requested password length.`;
+const ERR_MSG_NO_CHAR_TYPE_SET_CHOSEN = `Password generator cancelled: no character type sets have been selected.`;
 const ERR_MSG_PASSWORD_TOO_LONG = `Password length must be no more than ${MAX_PASSWORD_LENGTH} characters.`;
 const ERR_MSG_PASSWORD_TOO_SHORT = `Password length must be at least ${MIN_PASSWORD_LENGTH} characters.`;
 const ERR_MSG_NON_INTEGER_FOR_PASSWORD_LENGTH = `You have provided a non integer.  We require an integer to indicate your preferred password length.`;
@@ -60,10 +64,14 @@ const ERR_MSG_NON_INTEGER_FOR_PASSWORD_LENGTH = `You have provided a non integer
 
 /*  LIBRARY FUNCTIONS */
 
-// TODO : float 5.5, cancel check for null?
-
+/**
+ * Displays prompt message to user requesting required password length.
+ * Function validates user's answer, looping until either cancel is hit or valid password length is given.
+ * @returns password length requested by user or null if user cancelled the prompt message.
+ */
 function promptPasswordLength() {
  
+    var length;
     var lengthStr;
     var errLength;
     var errNonInteger;
@@ -73,26 +81,21 @@ function promptPasswordLength() {
         errNonInteger = false;
 
         lengthStr = prompt(PROMPT_MSG_PASSWORD_LENGTH);
-        console.log(`promptPasswordLength has length as ${length}`);
+        console.log(`password to be ${lengthStr} chars long`);
 
         if (lengthStr == null) {
-            //TODO  User selected cancel but need to throw error or check in calling code
+            length=null;
             break;
         }
 
         length = parseInt(lengthStr);   // TODO: if give say 5.5 will round to 5?
 
-        console.log(`lengthStr = ${lengthStr}`);
-        console.log(`length = ${length}`);
-
         if (isNaN(length))  { 
             alert(ERR_MSG_NON_INTEGER_FOR_PASSWORD_LENGTH);
             errNonInteger=true;
-            // expecting an integer. Please either enter an integer or cancel to terminate the Password Generator.
 
         } else if (length < MIN_PASSWORD_LENGTH) {
             alert(ERR_MSG_PASSWORD_TOO_SHORT);
-            // wrong password length chosen. Please either select a length between 10 and 64 or cancel to terminate the Password Generator.
             errLength = true;
 
         } else if (length > MAX_PASSWORD_LENGTH) {
@@ -115,7 +118,7 @@ function promptPasswordLength() {
  * 
  * @param {*} charType 
  * @returns Boolean of true if user selected OK to confirm charTypes were to be included in password, else false is returned.
- * If unknown charType returns false.   TODO: Change to throw error
+ * If unknown charType returns false.   
  */
 function confirmCharType(charType) {
 
@@ -145,33 +148,45 @@ function confirmCharType(charType) {
 }
 
 
-// TODO: Add object PasswordGenerator so criteria stored as data members.
 /**
  * Prompt user for password options, including
  *  - password length
  *  - inclusion of special chars, numerical chars, lower case chars, upper case chars
  * 
- * Validation
+ * Checks to see if cancel was selected and no option provided. If so then throws error
  * 
  * @returns array of 5 attributes representing:
  *   chosen length of password followed by 4 booleans indicating whether 
  *   special chars, numerical chars, lower case chars and upper case chars have been selected as part of password criteria.
+ * @throws Will throw an error if no character type set is selected.
+ * 
  */
 function getPasswordOptions() {
 
-    var length = promptPasswordLength();
-    var includeSpecialChars = confirmCharType(CHAR_TYPE_SPECIAL_IDX);
-    var includeNumerical = confirmCharType(CHAR_TYPE_NUMERICAL_IDX);
-    var includeLowerCase = confirmCharType(CHAR_TYPE_LOWER_IDX);
-    var includeUpperCase = confirmCharType(CHAR_TYPE_UPPER_IDX);
-
+    var length;
+    var includeSpecialChars;
+    var includeNumerical;
+    var includeLowerCase;
+    var includeUpperCase;
     
-    // TODO: Ensure have at least one charType else throw ERROR or loop until selected.
-    // if includeSpecialChars || includeNumerical || includeLowerCase || includeUpperCase then
-    //  return
-    // else
-    //  throw error
-    return [length, includeSpecialChars, includeNumerical, includeLowerCase , includeUpperCase];
+    // Password length
+    length = promptPasswordLength();
+    if (length==null) {
+        throw new Error(ERR_MSG_PASSWORD_CANCELLED);
+    }
+    
+    // Sets of char types to include in password
+    includeSpecialChars = confirmCharType(CHAR_TYPE_SPECIAL_IDX);
+    includeNumerical = confirmCharType(CHAR_TYPE_NUMERICAL_IDX);
+    includeLowerCase = confirmCharType(CHAR_TYPE_LOWER_IDX);
+    includeUpperCase = confirmCharType(CHAR_TYPE_UPPER_IDX);
+
+    // Ensure have at least one charType 
+    if (includeSpecialChars || includeNumerical || includeLowerCase || includeUpperCase) {
+        return [length, includeSpecialChars, includeNumerical, includeLowerCase , includeUpperCase];
+    } else {
+        throw new Error(ERR_MSG_NO_CHAR_TYPE_SET_CHOSEN);
+    }
 
 }
 
@@ -185,7 +200,6 @@ function getPasswordOptions() {
  */
 function getRandom(arr) {
 
-    console.log(`arr = `)
     var randomIdx;
     if (arr != null && arr.length>0) {
         randomIdx = Math.floor(Math.random() * arr.length);
@@ -203,43 +217,50 @@ function getRandom(arr) {
  */
 function generatePassword() {
 
-    var password='';     
-    var chosenCharTypes = [];   
+    try {
 
-    var optionsArray = getPasswordOptions();
+        var password='';     
+        var chosenCharTypes = [];   
 
-    // Checking options to build up array of all the chars in the selected char types
-    if (optionsArray[CHAR_TYPE_SPECIAL_IDX] ) {
-        chosenCharTypes = chosenCharTypes.concat(specialCharacters);
-    }
+        var optionsArray = getPasswordOptions();
+
+        // Checking options to build up array of all the chars in the selected char types
+        if (optionsArray[CHAR_TYPE_SPECIAL_IDX] ) {
+            chosenCharTypes = chosenCharTypes.concat(specialCharacters);
+        }
+        
+        if (optionsArray[CHAR_TYPE_NUMERICAL_IDX] ) {
+            chosenCharTypes = chosenCharTypes.concat(numericCharacters);
+        }
+        
+        if (optionsArray[CHAR_TYPE_LOWER_IDX] ) {
+            chosenCharTypes = chosenCharTypes.concat(lowerCasedCharacters);
+        }
+        
+        if (optionsArray[CHAR_TYPE_UPPER_IDX] ) {
+            chosenCharTypes = chosenCharTypes.concat(upperCasedCharacters);
+        }
+
+
+        // Is this more efficient than having array access in the for loop condition?
+        // Would it only access once or each time through loop to check condition?
+
+        // Random select chars to create new password
+        var passwordLength = optionsArray[PASSWORD_LENGTH_IDX];
+        for (var i=0; i<passwordLength; i++) {
+            password += getRandom(chosenCharTypes);
+
+            // or is concat more performant that +=
+            // How do we profile?
+        }
     
-    if (optionsArray[CHAR_TYPE_NUMERICAL_IDX] ) {
-        chosenCharTypes = chosenCharTypes.concat(numericCharacters);
+        console.log(`password = ${password}`);
+        return password;
     }
-    
-    if (optionsArray[CHAR_TYPE_LOWER_IDX] ) {
-        chosenCharTypes = chosenCharTypes.concat(lowerCasedCharacters);
+    catch(err) {
+        alert(err);
+        console.log(err);
     }
-    
-    if (optionsArray[CHAR_TYPE_UPPER_IDX] ) {
-        chosenCharTypes = chosenCharTypes.concat(upperCasedCharacters);
-    }
-
-
-    // Is this more efficient than having array access in the for loop condition?
-    // Would it only access once or each time through loop to check condition?
-
-    // Random select chars to create new password
-    var passwordLength = optionsArray[PASSWORD_LENGTH_IDX];
-    for (var i=0; i<passwordLength; i++) {
-        password += getRandom(chosenCharTypes);
-
-        // or is concat more performant that +=
-        // How do we profile?
-    }
-   
-    console.log(`password = ${password}`);
-    return password;
 
 }
 
