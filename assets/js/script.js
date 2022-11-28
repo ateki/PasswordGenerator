@@ -209,50 +209,44 @@ function getRandom(arr) {
  */
 function generatePassword() {
 
-    try {
 
-        var password='';     
-        var chosenCharTypes = [];   
+    var password='';     
+    var chosenCharTypes = [];   
 
-        var optionsArray = getPasswordOptions();
+    var optionsArray = getPasswordOptions();
 
-        // Checking options to build up array of all the chars in the selected char types
-        if (optionsArray[CHAR_TYPE_SPECIAL_IDX] ) {
+    // Checking options to build up array of all the chars in the selected char types
+    if (optionsArray[CHAR_TYPE_SPECIAL_IDX] ) {
             chosenCharTypes = chosenCharTypes.concat(specialCharacters);
-        }
+    }
         
-        if (optionsArray[CHAR_TYPE_NUMERICAL_IDX] ) {
+    if (optionsArray[CHAR_TYPE_NUMERICAL_IDX] ) {
             chosenCharTypes = chosenCharTypes.concat(numericCharacters);
-        }
+    }
         
-        if (optionsArray[CHAR_TYPE_LOWER_IDX] ) {
+    if (optionsArray[CHAR_TYPE_LOWER_IDX] ) {
             chosenCharTypes = chosenCharTypes.concat(lowerCasedCharacters);
-        }
+    }
         
-        if (optionsArray[CHAR_TYPE_UPPER_IDX] ) {
+    if (optionsArray[CHAR_TYPE_UPPER_IDX] ) {
             chosenCharTypes = chosenCharTypes.concat(upperCasedCharacters);
-        }
+    }
 
 
-        // Is this more efficient than having array access in the for loop condition?
-        // Would it only access once or each time through loop to check condition?
+    // Is this more efficient than having array access in the for loop condition?
+    // Would it only access once or each time through loop to check condition?
 
-        // Random select chars to create new password
-        var passwordLength = optionsArray[PASSWORD_LENGTH_IDX];
-        for (var i=0; i<passwordLength; i++) {
-            password += getRandom(chosenCharTypes);
+    // Random select chars to create new password
+    var passwordLength = optionsArray[PASSWORD_LENGTH_IDX];
+    for (var i=0; i<passwordLength; i++) {
+        password += getRandom(chosenCharTypes);
 
-            // or is concat more performant that +=
-            // How do we profile?
-        }
+        // or is concat more performant that +=
+        // How do we profile?
+    }
     
-        console.log(`password = ${password}`);
-        return password;
-    }
-    catch(err) {
-        alert(err);
-        console.log(err);
-    }
+    console.log(`password = ${password}`);
+    return password;
 
 }
 
@@ -267,10 +261,16 @@ var generateBtn = document.querySelector('#generate');
  * Write password to the #password input
  */
 function writePassword() {
-  var password = generatePassword();
-  var passwordText = document.querySelector('#password');
+    try {
+        var password = generatePassword();
+        var passwordText = document.querySelector('#password');
 
-  passwordText.value = password;
+        passwordText.value = password;
+    }
+    catch(err) {
+        alert(err);
+        console.log(err);
+    }
 }
 
 
