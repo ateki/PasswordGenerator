@@ -1,11 +1,3 @@
-// TODO: Differentiate between CHAR_TYPE_SPECIAL and CHAR_TYPE_SPECIAL_IDX. ALthough can use same best split
-// TODO: Create objects so dont need to pass options array out of function
-// TODO: Research performance of objects....etc.
-// TODO: User option validation and throw error/alert/loop until cancel or enter valid number
-// TODO: Add to Git To Do list ...
-// TODO: Research modules https://stackoverflow.com/questions/8752627/how-can-i-split-a-javascript-application-into-multiple-files
-// TODO: Add object PasswordGenerator so criteria stored as data members.
-
 /*
  * --------------------------------------------------------------------------------------
  * Generates random password based on user's chosen selection criteria and password length.
